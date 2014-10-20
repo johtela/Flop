@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{21CA28A6-8C98-436F-AB72-3457467F5CEB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Flop</RootNamespace>
+    <AssemblyName>Flop</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Base\Container.cs" />
+    <Compile Include="Base\Either.cs" />
+    <Compile Include="Base\Extensions.cs" />
+    <Compile Include="Base\Fun.cs" />
+    <Compile Include="Base\Lazy.cs" />
+    <Compile Include="Base\Monoid.cs" />
+    <Compile Include="Base\NOPException.cs" />
+    <Compile Include="Base\Option.cs" />
+    <Compile Include="Base\Prelude.cs" />
+    <Compile Include="Base\Reducible.cs" />
+    <Compile Include="Base\Unit.cs" />
+    <Compile Include="Collections\ArraySegment.cs" />
+    <Compile Include="Collections\FingerTree.cs" />
+    <Compile Include="Collections\ISequence.cs" />
+    <Compile Include="Collections\IStream.cs" />
+    <Compile Include="Collections\IStreamBuilder.cs" />
+    <Compile Include="Collections\LazyList.cs" />
+    <Compile Include="Collections\Map.cs" />
+    <Compile Include="Collections\Sequence.cs" />
+    <Compile Include="Collections\Set.cs" />
+    <Compile Include="Collections\StrictList.cs" />
+    <Compile Include="Collections\Tree.cs" />
+    <Compile Include="Parsing\Consumed.cs" />
+    <Compile Include="Parsing\Input.cs" />
+    <Compile Include="Parsing\ParseError.cs" />
+    <Compile Include="Parsing\Parser.cs" />
+    <Compile Include="Parsing\Reply.cs" />
+    <Compile Include="Parsing\StringParser.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testing\Arbitrary.cs" />
+    <Compile Include="Testing\DefaultArbitrary.cs" />
+    <Compile Include="Testing\Gen.cs" />
+    <Compile Include="Testing\Property.cs" />
+    <Compile Include="Testing\Tester.cs" />
+    <Compile Include="Testing\TestState.cs" />
+    <Compile Include="Testing\VisualConsole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Visuals\Animation.cs" />
+    <Compile Include="Visuals\GraphicsContext.cs" />
+    <Compile Include="Visuals\VBox.cs" />
+    <Compile Include="Visuals\Visual.cs" />
+    <Compile Include="Visuals\VisualControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Visuals\VisualStyle.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

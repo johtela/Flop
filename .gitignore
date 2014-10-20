@@ -1,0 +1,9 @@
+*~
+*.swp
+bin
+obj
+*.pidb
+*.userprefs
+
+*.suo
+*.user
