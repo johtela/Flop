@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h1 id="basic-concepts">Basic Concepts</h1>
+<h2 id="values-and-immutability">Values and Immutability</h2>
+<p>Functional programming differs from object-oriented programming in many ways. Perhaps the most fundamental trait separating the two is that in FP value types are prevalent whereas in OOP reference types are the default. Objects have both state and identity, and the reference usually acts as object's identity. Value types used in FP have just state. Moreover, once initialized, the state does not change. Value types are said to be <em>immutable</em> in FP.</p>
+<p>The implications of this distinction are quite far-reaching. In FP computations are performed by functions which take values as arguments and produce new values. In OOP computations happen through side effects when objects are mutated. The OO-style is inherently imperative and the language constructs of C# adhere to this style for the most part. Interestingly, many of the more recent features of C# are actually inspired by functional languages. These features include generics (which is called parametric polymorphism in FP), anonymous functions a.k.a. lambdas, and LINQ, which is inspired by list comprehensions.</p>
+<p>These new features make it possible to write C# in functional way although the language itself does not enforce this style. For example, you can define an object to be immutable, but it will still be a reference type, not a value. Any function accepting an object as an argument bears the risk of failing unexpectedly, if it does not explicitly check that the argument is not null. Sometimes you see code bases in which all functions are littered with null argument checks. This is awkward and inefficient as the same value is might be checked many times inside loops or other methods. Since objects are inherently nullable, many library writers feel that it is necessary to practice defensive programming to cope with the issue.</p>
+<p>In Flop all types are essentially value types, even if they are implemented as classes. There are no excessive null checks, rather the value semantics is assumed to hold everywhere. If this is not case, a null reference exception is probably thrown at you by the .NET framework at some point. The responsibility lies with the user to make sure that no null references are passed to Flop. In practice, it is quite unusual to get problems because of this requirement. Once the functional style is embraced, null values in the code will be few and far between. The most likely way to trip on this requirement is to forget to initialize some member field in a class constructor.</p>
+<p>Of course C# has also the <code>struct</code> type which <em>is</em> a true value type. Alas, the utility of structs is diminished by the fact that they are allocated from stack instead of garbage collected object heap. This makes their performance worse than objects' when they contain more than one or two fields. Consequently, structs are only good for types that are sufficiently small and simple.</p>
+<p>Assuming value semantics for all types has other consequences as well. Since nulls are not allowed, there needs to be an explicit way of denoting that a type might have no value. This the purpose of the <code>Option&lt;T&gt;</code> type.</p>
+<p>Option is similar to the <code>Nullable&lt;T&gt;</code> type found in the <code>System</code> namespace, but has one important difference: it can encapsulate both reference and value types while Nullable can contain only value types. In other words, Nullable has the <code>struct</code> restriction on its generic type parameter. Option will work with any type.</p>
+<p>The name Option is borrowed from F# where the type is part of the core library. In Haskell the same type is known as Maybe. A beloved child has many names<sup><a href="#fn1" class="footnoteRef" id="fnref1">1</a></sup>.</p>
+<p>Continuing stealing ideas from F# and Haskell, the next obvious loot is the <code>Either&lt;T, U&gt;</code> type. It is slightly more complex than Option which <em>might</em> have a value. Either can hold a value of type <code>T</code> or <code>U</code>, but not both at the same time. It is convenient, for example, for a function that can return either a value, or an error message, if something went wrong.</p>
+<p>The value of type <code>T</code> is contained in the <code>Left</code> property of the Either class, and the value of type <code>U</code> in the <code>Right</code> property. The properties <code>IsLeft</code> and <code>IsRight</code> tell which one has the value. If you try to access the wrong one, an <code>EitherException</code> is thrown.</p>
+<p>A final remark about the value semantics: because the equality operator <code>==</code> compares object references by default, it is used seldom in Flop. When equality comparison is needed for arbitrary (generic) types, the <code>Object.Equals()</code> method is used. This means that for user-defined types overriding Equals is almost mandatory. As the .NET framework has coupled the usage of Equals to the <code>GetHashCode()</code> method, the latter needs to be implemented as well. Fortunately the implementation of these methods is most often a trivial aggregation of the member fields.</p>
+<h2 id="tuples">Tuples</h2>
+<p>.NET framework already contains few functional data types that the Flop library uses extensively. One of these is the <a href="http://msdn.microsoft.com/en-us/library/system.tuple(v=vs.110).aspx">Tuple class</a>. Tuples are important in functional programming since they make it possible to create compound types quickly without defining a new named data structure. Functional languages usually have special syntax for creating tuples. Here is how a tuple is created in F#:</p>
+<pre class="sourceCode Fsharp"><code class="sourceCode fsharp"><span class="kw">let</span> t = (42, <span class="st">&quot;foo&quot;</span>)</code></pre>
+<p>In C# there is no built-in syntactic support for tuples, but we can use a trick that utilizes the generic type inference to make creating tuples a bit easier. Instead of writing:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="dt">var</span> t = <span class="kw">new</span> Tuple&lt;<span class="dt">int</span>, <span class="dt">string</span>&gt;(<span class="dv">42</span>, <span class="st">&quot;foo&quot;</span>);</code></pre>
+<p>We can omit the type parameters by using the static <code>Create</code> method in the <code>Tuple</code> class:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="dt">var</span> t = Tuple.<span class="fu">Create</span>(<span class="dv">42</span>, <span class="st">&quot;foo&quot;</span>);</code></pre>
+<p>The same trick is used in other places of Flop library as well. In functional languages the members of a tuple are anonymous, and they are bound to local variables by pattern matching:</p>
+<pre class="sourceCode Fsharp"><code class="sourceCode fsharp"><span class="kw">let</span> (n, s) = t</code></pre>
+<p>In C# there is no pattern matching, but we can simulate it by creating the following extension method (defined in the <code>Flop.Extensions</code> class):</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> Bind&lt;T, U&gt; (<span class="kw">this</span> Tuple&lt;T, U&gt; tuple, Action&lt;T, U&gt; action)
+{
+    <span class="fu">action</span> (tuple.<span class="fu">Item1</span>, tuple.<span class="fu">Item2</span>);
+}</code></pre>
+<p>This extension methods binds the members of a tuple to the arguments of a lambda expression. It can be used like so:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs">t.<span class="fu">Bind</span>((n, s) =&gt; ...)</code></pre>
+<p>Since the members of a tuple are just properties of the <code>Tuple&lt;T1,T2,...&gt;</code> class it is naturally possible to refer to the members of a tuple by their names. The name of the <em>i</em>th item in the tuple is <code>Item</code><em>i</em>.</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs">n = t.<span class="fu">Item1</span>;
+s = t.<span class="fu">Item2</span>;</code></pre>
+<h2 id="functions">Functions</h2>
+<p>The bread and butter of functional programming is, of course, a function. Functions in C# come in many forms: as instance methods, static methods, and delegates. None of these actually corresponds to the mathematical notion of function that is prevalent in FP. A function, in its purest form, is just a black box that takes an input and returns a result. A function is said to be <em>pure</em>, if for the same argument it always returns the same result. In other words, the result of a function only depends on its argument and <em>not</em> on any kind of shared state.</p>
+<p>In C# functions are always defined in context of a class, hence they are called methods. The closest thing to a &quot;real&quot; function in C# is static method which does not carry the implicit <code>this</code> parameter that instance methods do. In FP, functions are also first class citizens. This means that they can be bound to values, given as argument, or returned from functions. In C#, the same thing can be achieved with delegates which can be bound to both static and instance methods.</p>
+<p>Delegates were originally used just for callbacks and events. After generic types were added to .NET 2.0 and especially after LINQ was introduced in C# 3.0, delegates were promoted to more significant role. Generic function types <code>Func&lt;T1, ...&gt;</code> and <code>Action&lt;T1, ...&gt;</code> were added to the <code>System</code> namespace. These types can represent any function, as long as it has reasonable number of arguments. The difference between <code>Func</code> and <code>Action</code> is that the latter does not return anything, i.e. it is bound to a <code>void</code> method. In FP, a special &quot;Unit&quot; type is used in these cases. Unit is a regular type, but it only has one possible value that represents &quot;no value&quot;. So in functional setting, there is no distinction between functions that return a value or the ones that do not. To simplify working with functions and delegates, Flop library uses only the <code>Func</code> types and defines the missing Unit type in the <code>Flop.Unit</code> class.</p>
+<p>Another important feature, that was added to C# 3.0, is support for lambda expressions. These can be used to declare anonymous functions succinctly without the need for writing down the type declarations. They also create a closure of the local variables referenced in the lambda expression, which is arguably the most important enabling mechanism for functional programming. Lambda expressions can be used to implement any delegate type, but most of the time they are used to implement functions of the <code>Func&lt;T1, ...&gt;</code> types. Funcs are not compatible to other delegate types even when their signatures match. This is somewhat confusing but reflects the fact that Funcs are just parameterized delegate types.</p>
+<p>As first class values functions can also be manipulated generically. The most common operations performed for functions are partial evaluation, composition, and <em>currying</em>. All of these operations are defined as extension methods in the static <code>Flop.Fun</code> class.</p>
+<p>Partial evaluation generates a new function from an existing function by fixing some of its arguments. For example, if you define a function:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs">Func&lt;<span class="dt">string</span>, <span class="dt">int</span>, <span class="dt">string</span>&gt; f = (s, i) =&gt; s + i.<span class="fu">ToString</span>();</code></pre>
+<p>you can partially evaluate it by writing:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="dt">var</span> p = f.<span class="fu">Partial</span>(<span class="st">&quot;foo&quot;</span>);</code></pre>
+<p>The type of the <code>p</code> is <code>Func&lt;int, string&gt;</code> since the first <code>string</code> argument is fixed. You can also fix all the arguments, which leaves only the return type:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="dt">var</span> p2 = f.<span class="fu">Partial</span>(<span class="st">&quot;foo&quot;</span>, <span class="dv">42</span>);</code></pre>
+<p>p2 has now the type <code>Func&lt;string&gt;</code>, which means that it can be now called without arguments:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="dt">var</span> s = <span class="fu">p2</span>();</code></pre>
+<p>There are different extension methods in <code>Flop.Fun</code> for all parameter combinations. The maximum number of parameters is currently restricted to four, however.</p>
+<p>Two functions can be composed together when the return type of the first function matches the argument type of the second. The composed function calls the first function and then uses its result as the argument for the second function. In functional syntax the type signature of the compose function is:</p>
+<pre class="sourceCode Fsharp"><code class="sourceCode fsharp">(a -&gt; b) -&gt; (b -&gt; c) -&gt; a -&gt; c </code></pre>
+<p>In Flop the composition function is defined as extension method. Its type signature is a bit more cluttered:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="kw">public</span> <span class="kw">static</span> Func&lt;T1, TRes&gt; Compose&lt;T1, T2, TRes&gt; (<span class="kw">this</span> Func&lt;T1, T2&gt; func1, Func&lt;T2, TRes&gt; func2)</code></pre>
+<p>Nevertheless, the usage of compose function is simple:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs">Func&lt;<span class="dt">double</span>, <span class="dt">double</span>&gt; sin = Math.<span class="fu">Sin</span>;
+Func&lt;<span class="dt">double</span>, <span class="dt">double</span>&gt; cos = Math.<span class="fu">Cos</span>; 
+<span class="dt">var</span> sincos = sin.<span class="fu">Compose</span> (cos);</code></pre>
+<p>Unfortunately the following shorthand does not go pass the C# compiler. This is due to the fact the methods do not have implicit coercion to <code>Func</code> types.</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="co">// DOES NOT WORK</span>
+<span class="dt">var</span> sincos = Math.<span class="fu">Sin</span>.<span class="fu">Compose</span> (Math.<span class="fu">Cos</span>);
+
+<span class="co">// ALSO DOES NOT WORK</span>
+<span class="dt">var</span> sin = Math.<span class="fu">Sin</span>;
+<span class="dt">var</span> cos = Math.<span class="fu">Cos</span>; 
+<span class="dt">var</span> sincos = sin.<span class="fu">Compose</span> (cos);</code></pre>
+<p>Omitting the types of the local variables does not work either, since the C# compiler does not know to which delegate types to cast the methods to. The type inference of C# only looks at the right hand side of the var statement, so the compiler does not utilize the fact that <code>sin</code> and <code>cos</code> variables are used as Funcs later in the code. Because of these limitations the compose operation is less useful in C# than in functional languages. In most cases, writing the composition inside a lambda expression results in shorter code, as shown below. Be that as it may, it is still good to formalize the concept and define it centrally.</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs">Func&lt;<span class="dt">double</span>, <span class="dt">double</span>&gt; sincos = d =&gt; <span class="fu">cos</span>(<span class="fu">sin</span>(d))</code></pre>
+<p>In lambda calculus, which forms the theoretical foundation for functional programming, all functions have exactly one argument. A function with two arguments is defined in lambda calculus as a function that, given the first argument, returns another function that takes the second argument. This idea is shown in the function signatures of F# and Haskell, which do not distinguish argument types from return types. For example, in F# the type of the &quot;or&quot; operator (||) is:</p>
+<pre class="sourceCode Fsharp"><code class="sourceCode fsharp"><span class="dt">bool</span> -&gt; <span class="dt">bool</span> -&gt; <span class="dt">bool</span> </code></pre>
+<p>This type signature can be read in two ways: given two <code>bool</code>s the function returns a <code>bool</code>; or given a <code>bool</code> the function returns another function which, given a <code>bool</code>, returns <code>bool</code>. In fact, the <code>-&gt;</code> operator is right associative, so the same signature can be written differently to better convey this idea:</p>
+<pre class="sourceCode Fsharp"><code class="sourceCode fsharp"><span class="dt">bool</span> -&gt; (<span class="dt">bool</span> -&gt; <span class="dt">bool</span>) </code></pre>
+<p>By generalizing this notion a function with arbitrary number of arguments can be transformed to an equivalent function that has only one argument. This process is called <em>currying</em> according to mathematician Haskell Curry who, along with Alonzo church and others, discovered the mathematical foundations of lambda calculus.</p>
+<p>Currying differs from partial application at least in two ways: partial application fixes one or more arguments whereas currying does not actually fix any arguments - it essentially returns the same function in a different form. In addition, partial application always returns a function that may have zero or more arguments whereas curried function returns either the final value or another function with exactly one argument. The differences are subtle but significant.</p>
+<p>Currying operation is also defined as an extension method in the <code>Flop.Fun</code> class:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="kw">public</span> <span class="kw">static</span> Func&lt;T1, Func&lt;T2, TRes&gt;&gt; Curry&lt;T1, T2, TRes&gt; (<span class="kw">this</span> Func&lt;T1, T2, TRes&gt; func)</code></pre>
+<p>Calling a curried function looks a bit weird in C# because of the parentheses around each argument:</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs">Func&lt;<span class="dt">string</span>, <span class="dt">int</span>, <span class="dt">string</span>&gt; f = (s, i) =&gt; s + i.<span class="fu">ToString</span>();
+<span class="dt">var</span> c = f.<span class="fu">Curry</span>();
+<span class="dt">var</span> i = <span class="fu">c</span>(<span class="st">&quot;foo&quot;</span>)(<span class="dv">42</span>);</code></pre>
+<p>In F# and Haskell function arguments are listed without parentheses, so currying does not change how a function is called. Partial application happens automatically in these languages as they use the Hindley-Milner type system in which function types are already defined in the curried form. Because the C# type system does not work in this way, the need for currying arises quite seldom in C#. It is more a curiosity than a practical tool in that setting. Partial application, on the other hand, is very common in functional-style C# code.</p>
+<p>There is an overloaded version of the <code>Curry</code> method to functions with 2-4 arguments. It does not make sense to define currying for a function with single argument since it is already in the curried form.</p>
+<p>Finally, there are couple of generic functions defined <code>Flop.Fun</code> class that are useful in many occasions. First of these is the identity function that just returns its argument as a result.</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="kw">public</span> <span class="kw">static</span> T Identity&lt;T&gt; (T arg)
+{
+    <span class="kw">return</span> arg;
+}</code></pre>
+<p>Another trivial but useful generic function is Ignore, which essentially just looses its argument. It allows expressions of any type to be used as statements, which is handy when a function is called only for its side-effects.</p>
+<pre class="sourceCode Cs"><code class="sourceCode cs"><span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> Ignore&lt;T&gt; (T value)
+{   
+}</code></pre>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>A Finnish proverb meaning that the importance of something becomes evident when it is called by different names by different people.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+</body>
+</html>
