@@ -6,7 +6,7 @@ Values and Immutability
 
 Functional programming differs from object-oriented programming in many ways. Perhaps the most distinctive trait separating the two is how data types are treated. In FP value types are prevalent, whereas in OOP reference types are the default. Objects by definition have both state and identity, and object's reference usually acts as its identity. Value types, on the other hand, have just state and, once initialized, the state does not change. When this constraint is enforced, the types are said to be *immutable*.
 
-The consequence of this seemingly small language design choice is quite far-reaching: it implies how computations are performed in the language. In purely functional languages such as Haskell all computations are modelled as mathematical functions that take one or more values as their arguments and produce a single value as result, while having no other side effects. Conversely, in object-oriented languages computations typically happen through side effects as objects' states are mutated. The OO-style is inherently imperative and the language constructs of C# adhere to this style for the most part. Fortunately, many of the more recent features of C# are actually borrowed from functional languages. These features include generics (which is called parametric polymorphism in FP), anonymous functions a.k.a. lambda expressions, and LINQ, which is adapted from Haskell's list comprehensions.
+The consequence of this seemingly small language design choice is quite far-reaching: it implies how computations are performed in the language. In a purely functional language such as Haskell all computations are modelled as mathematical functions that take one or more values as their arguments and produce a single value as result, while having no other side effects. Conversely, in object-oriented languages computations typically happen through side effects as objects' states are mutated. The OO-style is inherently imperative and the language constructs of C# adhere to this style for the most part. Fortunately, many of the more recent features of C# are actually borrowed from functional languages. These features include generics (which is called parametric polymorphism in FP), anonymous functions a.k.a. lambda expressions, and LINQ, which is adapted from Haskell's list comprehensions.
 
 It is possible to pretend that objects are value types by overriding the `Equals` and `GetHashCode` methods to use value semantics. You can also make an object immutable by defining all of its fields with `readonly` modifiers which makes it impossible to change object's state outside constructors. The object will still be a reference type, not a value. All methods accepting an object type as an argument bear the risk of failing unexpectedly, if they does not explicitly check that the argument is not null. This leads to code bases where methods are littered with null argument checks. This looks ugly and is inefficient as the same reference might be checked multiple times inside loops or other method calls. Since objects are always reference types and inherently nullable, developers feel that it is necessary to practice defensive programming to cope with the issue.
 
@@ -20,7 +20,7 @@ Option is similar to the `Nullable<T>` type found in the `System` namespace, but
 
 The name Option is borrowed from F# where the type is part of the core library. In Haskell the same type is known as Maybe.
 
-Continuing stealing ideas from F# and Haskell, the next obvious loot is the `Either<T, U>` type. It is slightly more complex than Option which *might* have a value. Either can hold a value of type `T` or `U`, but not both at the same time. It is convenient to use, for example, in a function that can return either a value, or an error message, if something went wrong.
+Continuing stealing ideas from F# and Haskell, the next obvious loot is the `Either<T, U>` type. It is slightly more complex than Option which *might* have a value. Either can hold a value of type `T` or `U`, but not both at the same time. It is convenient, for example, in a function that can return either a value, or an error message, if something went wrong.
 
 The value of type `T` is contained in the `Left` property of the Either class, and the value of type `U` in the `Right` property. The properties `IsLeft` and `IsRight` tell which one has the value. If you try to access the wrong one, an `EitherException` is thrown.
 
@@ -38,13 +38,13 @@ let t = (42, "foo")
 
 In C# there is no built-in syntactic support for tuples, but we can use a trick that utilizes the generic type inference to make creating tuples a bit easier. Instead of writing:
 
-```Cs
+```Csharp
 var t = new Tuple<int, string>(42, "foo");
 ```
 
 We can omit the type parameters by using the static `Create` method in the `Tuple` class:
 
-```Cs
+```Csharp
 var t = Tuple.Create(42, "foo");
 ```
 
@@ -57,7 +57,7 @@ let (n, s) = t
 
 In C# there is no pattern matching, but we can simulate it by creating the following extension method (defined in the `Flop.Extensions` class):
 
-```Cs
+```Csharp
 public static void Bind<T, U> (this Tuple<T, U> tuple, Action<T, U> action)
 {
 	action (tuple.Item1, tuple.Item2);
@@ -66,13 +66,13 @@ public static void Bind<T, U> (this Tuple<T, U> tuple, Action<T, U> action)
 
 This extension methods binds the members of a tuple to the arguments of a lambda expression. It can be used like so:
 
-```Cs
+```Csharp
 t.Bind((n, s) => ...)
 ```
 
 Since the members of a tuple are just properties of the `Tuple<T1,T2,...>`  class it is naturally possible to refer to the members of a tuple by their names. The name of the *i*th item in the tuple is `Item`*i*.
 
-```Cs
+```Csharp
 n = t.Item1;
 s = t.Item2;
 ```
@@ -85,7 +85,7 @@ The essential elemement of functional programming is, of course, a function. Ann
 
 In C# functions are always defined in context of a class, hence they are called methods. The closest thing to a "real" function in C# is a static method which does not carry the implicit `this` parameter which an instance method does. In FP, functions are also first class citizens. This means that they can be bound to values, given as argument, or returned from functions. In C#, this notion is mimicked by delegates which can be bound to both static and instance methods. 
 
-Delegates were originally used just for callbacks and events. After generic types were added to .NET 2.0 and especially after LINQ was introduced in C# 3.0,  delegates were promoted to more significant role. Generic function types `Func<T1, ...>` and `Action<T1, ...>` were added to the `System` namespace. These types can represent any function with reasonable number of arguments. The difference between `Func` and `Action` is that the latter does not return anything, i.e. it is bound to a `void` method. In FP, a special "Unit" type is used in these cases. Unit is a regular type, but it only has one possible value that represents "no value". So in functional setting, there is no distinction between functions that return a value or the ones that do not. To simplify working with functions and delegates, Flop library uses only the `Func` types and implements the missing Unit type in the `Flop.Unit` class.
+Delegates were originally used just for callbacks and events. After generic types were added to .NET 2.0 and especially after LINQ was introduced in C# 3.0,  delegates were promoted to more significant role. Generic function types `Func<T1, ...>` and `Action<T1, ...>` were added to the `System` namespace. These types can represent any function with a reasonable number of arguments. The difference between `Func` and `Action` is that the latter does not return anything, i.e. it is bound to a `void` method. In FP, a special "Unit" type is used in these cases. Unit is a regular type, but it only has one possible value that represents "no value". So in functional setting, there is no distinction between functions that return a value and the ones that do not. To simplify working with functions and delegates, Flop library uses only the `Func` types and implements the missing Unit type in the `Flop.Unit` class.
 
 Another important feature, that was added to C# 3.0, is the support for lambda expressions. These can be used to declare anonymous methods succinctly without the need for writing down the type declarations. They also create a closure of the local variables referenced by the lambda expression, which is arguably the most important enabling feature of functional programming. Lambda expressions can be used to implement any delegate type, but most of the time they are used to implement functions of the `Func<T1, ...>` types. Funcs are not compatible with other delegate types even when their parameter signatures match. This is somewhat illogical but reflects the fact that Funcs are just parameterized delegate types.  
 
@@ -97,25 +97,25 @@ As first class values functions can also be manipulated generically. The most co
 
 Partial evaluation generates a new function from an existing function by fixing some of its arguments. For example, if you define a function: 
 
-```Cs
+```Csharp
 Func<string, int, string> f = (s, i) => s + i.ToString();
 ```
 
 you can partially evaluate it by writing:
 
-```Cs
+```Csharp
 var p = f.Partial("foo");
 ```
 
 The type of the `p` is `Func<int, string>` since the first `string` argument is fixed. You can also fix all the arguments, which leaves only the return type:
 
-```Cs
+```Csharp
 var p2 = f.Partial("foo", 42);
 ```
 
 p2 has now the type `Func<string>`, which means that it can be now called without arguments:
 
-```Cs
+```Csharp
 var s = p2();
 ```
 
@@ -129,13 +129,13 @@ Two functions can be composed together when the return type of the first functio
 
 In Flop the composition function is defined as extension method. Its signature is a bit more cluttered:
 
-```Cs
+```Csharp
 public static Func<T1, TRes> Compose<T1, T2, TRes> (this Func<T1, T2> func1, Func<T2, TRes> func2)
 ```
 
 Nevertheless, using the Compose function is straightforward:
 
-```Cs
+```Csharp
 Func<double, double> sin = Math.Sin;
 Func<double, double> cos = Math.Cos; 
 var sincos = sin.Compose (cos);
@@ -143,7 +143,7 @@ var sincos = sin.Compose (cos);
 
 Unfortunately the following shorthand does not go pass the C# compiler. This is due to the fact the methods do not have implicit type coercion to `Func` delegate types.
 
-```Cs
+```Csharp
 // DOES NOT WORK
 var sincos = Math.Sin.Compose (Math.Cos);
 
@@ -155,7 +155,7 @@ var sincos = sin.Compose (cos);
 
 Omitting the types of the local variables does not work either, since the C# compiler does not know to which delegate types to cast the methods to. The type inference of C# only looks at the right hand side of the var statement, so the compiler does not utilize the fact that `sin` and `cos` variables are used as Funcs later in the code. Because of these limitations the compose operation is not as useful in C# that it is in functional languages. In most cases, writing the composition inside a lambda expression results in shorter code, as shown below. Be that as it may, it is still good to formalize the concept and define it centrally. 
 
-```Cs
+```Csharp
 Func<double, double> sincos = d => cos(sin(d))
 ```
 
@@ -177,13 +177,13 @@ Currying differs from partial application in two ways: partial application fixes
 
 Currying operation is also defined as an extension method in the `Flop.Fun` class:
 
-```Cs
+```Csharp
 public static Func<T1, Func<T2, TRes>> Curry<T1, T2, TRes> (this Func<T1, T2, TRes> func)
 ```
 
 Calling a curried function looks a bit weird in C# because of the parentheses around each argument:
 
-```Cs
+```Csharp
 Func<string, int, string> f = (s, i) => s + i.ToString();
 var c = f.Curry();
 var i = c("foo")(42);
@@ -195,7 +195,7 @@ There is an overloaded version of the `Curry` method to functions with 2-4 argum
 
 Finally, there are couple of generic functions defined `Flop.Fun` class that are useful in many occasions. First of these is the identity function that just returns its argument as a result.
 
-```Cs
+```Csharp
 public static T Identity<T> (T arg)
 {
 	return arg;
@@ -204,7 +204,7 @@ public static T Identity<T> (T arg)
 
 Another trivial but useful generic function is Ignore, which essentially just looses its argument. It allows expressions of any type to be used as statements, which is handy when a function is called only for its side-effects.
 
-```Cs
+```Csharp
 public static void Ignore<T> (T value)
 {	
 }
