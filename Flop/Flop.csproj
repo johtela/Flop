@@ -44,7 +44,6 @@
     <Compile Include="Base\Fun.cs" />
     <Compile Include="Base\Lazy.cs" />
     <Compile Include="Base\Monoid.cs" />
-    <Compile Include="Base\NOPException.cs" />
     <Compile Include="Base\Option.cs" />
     <Compile Include="Base\Prelude.cs" />
     <Compile Include="Base\Reducible.cs" />
