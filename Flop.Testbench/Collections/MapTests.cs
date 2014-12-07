@@ -2,24 +2,18 @@ namespace Flop.Testbench.Collections
 {
 	using System;
 	using System.Collections.Generic;
-	using Flop.Collections;
+    using System.Linq;
+    using Flop.Collections;
 	using Flop.Testing;
 
 	public class MapTests
 	{
-		private const int _itemCount = 10000;
-
-		private IEnumerable<Tuple<int, string>> Range (int max)
-		{
-			for (int i = 0; i < _itemCount; i++)
-			{
-				yield return new Tuple<int, string>(i, i.ToString());
-			}
-		}
+		private const int _itemCount = 100000;
 
 		private Map<int, string> CreateTestMap ()
 		{
-			return Map<int, string>.FromPairs (Range (_itemCount));
+			return Map<int, string>.FromPairs (
+                Enumerable.Range (0, _itemCount).Select (i => Tuple.Create (i, i.ToString())));
 		}
 
 		private IDictionary<int, string> CreateTestDictionary ()

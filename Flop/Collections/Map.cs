@@ -163,8 +163,8 @@ namespace Flop.Collections
 		{
 			get
 			{
-				foreach (_MapNode node in Tree<Map<K, V>, K>.TraverseDepthFirst(this))
-					yield return node.Key;
+				return from node in Tree<Map<K, V>, K>.TraverseDepthFirst(this)
+					   select node.Key;
 			}
 		}
 
@@ -175,8 +175,8 @@ namespace Flop.Collections
 		{
 			get
 			{
-				foreach (_MapNode node in Tree<Map<K, V>, K>.TraverseDepthFirst(this))
-					yield return node.Value;
+				return from node in Tree<Map<K, V>, K>.TraverseDepthFirst(this)
+                       select node.Value;
 			}
 		}
 
@@ -324,10 +324,8 @@ namespace Flop.Collections
 		/// in the order determined by the keys.</returns>
 		public IEnumerator<Tuple<K, V>> GetEnumerator ()
 		{
-			foreach (_MapNode node in Tree<Map<K, V>, K>.TraverseDepthFirst(this))
-			{
-				yield return new Tuple<K, V>(node.Key, node.Value);
-			}
+			return (from node in Tree<Map<K, V>, K>.TraverseDepthFirst(this)
+                   select new Tuple<K, V>(node.Key, node.Value)).GetEnumerator ();
 		}
 
 		#endregion

@@ -254,13 +254,11 @@ namespace Flop.Collections
 
 		#region IEnumerable<T> Members
 
-		public IEnumerator<T> GetEnumerator ()
-		{
-			foreach (_SetNode node in Tree<Set<T>, T>.TraverseDepthFirst(this))
-			{
-				yield return node.Key;
-			}
-		}
+        public IEnumerator<T> GetEnumerator ()
+        {
+            return (from node in Tree<Set<T>, T>.TraverseDepthFirst (this)
+                    select node.Key).GetEnumerator ();
+        }
 
 		#endregion
 

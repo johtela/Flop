@@ -2,24 +2,17 @@ namespace Flop.Testbench.Collections
 {
 	using System;
 	using System.Collections.Generic;
-	using Flop.Collections;
+    using System.Linq;
+    using Flop.Collections;
 	using Flop.Testing;
 
 	public class SetTests
 	{
-		private const int _itemCount = 65;
-
-		private IEnumerable<int> Range (int min, int max)
-		{
-			for (int i = 0; i < _itemCount; i++)
-			{
-				yield return i;
-			}
-		}
+		private const int _itemCount = 100;
 
 		private Set<int> CreateTestSet ()
 		{
-			return Set<int>.Create (Range (0, _itemCount));
+			return Set<int>.Create (Enumerable.Range (0, _itemCount));
 		}
 
 		[Test]
