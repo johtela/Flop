@@ -286,24 +286,23 @@
             }
         }
 
-        public static void Iterate (T tree, Action<int, T> action, int i, int cores)
+        public static void Iterate (T tree, Action<int, T> action, int i)
         {
             if (!tree.IsEmpty ())
             {
-                if (tree.Weight >= 1000 && cores > 1)
+                if (tree.Weight >= 1000)
                 {
-                    var iterLeft = Task.Run (() => Iterate (Left (tree), action, i, cores / 2));
-                    i += Left (tree).Weight;
-                    var iterRight = Task.Run (() => Iterate (Right (tree), action, i + 1, cores / 2));
-                    action (i, tree);
-                    Task.WaitAll (iterLeft, iterRight);
+                    Parallel.Invoke (
+                        () => Iterate (Left (tree), action, i),
+                        () => Iterate (Right (tree), action, i + Left (tree).Weight + 1));
+                    action (i + Left (tree).Weight, tree);
                 }
                 else
                 {
-                    Iterate (Left (tree), action, i, cores);
+                    Iterate (Left (tree), action, i);
                     i += Left (tree).Weight;
                     action (i++, tree);
-                    Iterate (Right (tree), action, i, cores);
+                    Iterate (Right (tree), action, i);
                 }
             }
         }
@@ -317,7 +316,7 @@
         {
             var result = new T[tree.Weight];
 
-            Iterate (tree, (i, t) => result[i] = t, 0, Environment.ProcessorCount);
+            Iterate (tree, (i, t) => result[i] = t, 0);
             return result;
         }
 
@@ -335,7 +334,7 @@
 
             Array.Sort (array, _comparer);
             var last = RemoveDuplicates (array, throwIfDuplicate);
-            return RebalanceList (array, 0, last, true, Environment.ProcessorCount);
+            return RebalanceList (array, 0, last, true);
         }
 
         public static int RemoveDuplicates (T[] array, bool throwIfDuplicate)
@@ -361,7 +360,7 @@
         private static T Rebalance (T tree)
         {
             var array = ToArray (tree);
-            return RebalanceList (array, 0, array.Length - 1, false, Environment.ProcessorCount);
+            return RebalanceList (array, 0, array.Length - 1, false);
         }
 
         /// <summary>
@@ -374,23 +373,23 @@
         /// in the list are recycled in the new tree. That is, the items are mutated
         /// to create the new tree.</param>
         /// <returns></returns>
-        private static T RebalanceList (T[] array, int low, int high, bool inPlace, int cores)
+        private static T RebalanceList (T[] array, int low, int high, bool inPlace)
         {
             var len = high - low + 1;
             if (len > 0)
             {
                 var middle = (low + high) / 2;
-                if (len >= 1000 && cores > 1)
+                if (len >= 1000)
                 {
-                    var rebLeft = Task.Run (() => RebalanceList (array, low, middle - 1, inPlace, cores / 2));
-                    var rebRight = Task.Run (() => RebalanceList (array, middle + 1, high, inPlace, cores / 2));
+                    var rebLeft = Task.Run (() => RebalanceList (array, low, middle - 1, inPlace));
+                    var rebRight = Task.Run (() => RebalanceList (array, middle + 1, high, inPlace));
                     Task.WaitAll (rebLeft, rebRight);
                     return (T)array[middle].Clone (rebLeft.Result, rebRight.Result, inPlace);
                 }
                 else
                     return (T)array[middle].Clone (
-                        RebalanceList (array, low, middle - 1, inPlace, cores),
-                        RebalanceList (array, middle + 1, high, inPlace, cores), inPlace);
+                        RebalanceList (array, low, middle - 1, inPlace),
+                        RebalanceList (array, middle + 1, high, inPlace), inPlace);
             }
             else
                 return _empty;
