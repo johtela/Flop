@@ -147,7 +147,7 @@
 					first = last;
 				list = list.Rest;
 			}
-			return new Tuple<StrictList<T>, StrictList<T>> (first, last);
+			return Tuple.Create (first, last);
 		}
 
 		/// <summary>
