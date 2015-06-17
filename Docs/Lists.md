@@ -139,4 +139,6 @@ Higher Order List Operations
 
 Functions which either return other functions or take other functions as parameters are called *higher order* functions. Higher order function is one of the tools in the functional programming toolbox that allows writing generalizable code. With a handful of operations defined for the data structures it is possible to implement wide range different use cases. 
 
-The canonical functions that can be defined for any data structure are `Map`, `Filter`, and `Reduce`.
+The canonical higher order functions that can be defined for any data structure are `Map`, `Filter`, and `Reduce`. The same functions can be found in LINQ with names `Select`, `Where`, and `Aggregate`. so they should be familiar to most C# programmers already. The fact that these methods can be implemented over `IEnumerable` indicates that they are very general concepts.
+
+
