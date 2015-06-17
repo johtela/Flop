@@ -137,8 +137,31 @@ With the help of this method operations like `InsertBefore`, `Remove`, and `Conc
 Higher Order List Operations
 ----------------------------
 
-Functions which either return other functions or take other functions as parameters are called *higher order* functions. Higher order function is one of the tools in the functional programming toolbox that allows writing generalizable code. With a handful of operations defined for the data structures it is possible to implement wide range different use cases. 
+Functions which either return other functions or take other functions as parameters are called *higher order* functions. Higher order function is one of the tools in the functional programming toolbox that allows writing generalizable code. With a handful of operations defined for all the collections it is possible to implement wide range different use cases. 
 
-The canonical higher order functions that can be defined for any data structure are `Map`, `Filter`, and `Reduce`. The same functions can be found in LINQ with names `Select`, `Where`, and `Aggregate`. so they should be familiar to most C# programmers already. The fact that these methods can be implemented over `IEnumerable` indicates that they are very general concepts.
+The canonical higher order functions that can be defined for any data structure are `Map`, `Filter`, and `Reduce`. The same functions can be found in LINQ with names `Select`, `Where`, and `Aggregate`, so they should be familiar to most C# programmers already. The fact that these methods can be implemented over `IEnumerable` indicates that they represent very general concepts.
+
+All these functions are of higher order. For example, `Map`/`Select` takes a function as a parameter that maps a single item of a collection to an item of possibly different type. `Filter`/`Where` takes a predicate function that tells for an item whether or not it should be included in the result collection. The most powerful of these operations is `Reduce`/`Aggregate` which traverses a collection updating an accumulator with each item of the collection. Everything one can do with a `foreach` loop can be done with `Reduce` as well.
+
+This is how `Map` is implemented for StrictList.
+
+```Csharp
+
+/// <summary>
+/// Map list to another list.
+/// </summary>
+/// <param name="func">Function that maps the items.</param>
+/// <returns>The mapped list.</returns>
+public StrictList<U> Map<U> (Func<T, U> func)
+{
+if (IsEmpty)
+return StrictList<U>.Empty;
+var result = List.Cons (func (First));
+var last = result;
+for (var list = Rest; !list.IsEmpty; list = list.Rest, last = last.Rest)
+last.Rest = List.Cons (func (list.First));
+return result;
+}
+```
 
 
