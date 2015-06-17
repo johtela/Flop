@@ -154,13 +154,13 @@ This is how `Map` is implemented for StrictList.
 /// <returns>The mapped list.</returns>
 public StrictList<U> Map<U> (Func<T, U> func)
 {
-if (IsEmpty)
-return StrictList<U>.Empty;
-var result = List.Cons (func (First));
-var last = result;
-for (var list = Rest; !list.IsEmpty; list = list.Rest, last = last.Rest)
-last.Rest = List.Cons (func (list.First));
-return result;
+   if (IsEmpty)
+      return StrictList<U>.Empty;
+    var result = List.Cons (func (First));
+    var last = result;
+    for (var list = Rest; !list.IsEmpty; list = list.Rest, last = last.Rest)
+        last.Rest = List.Cons (func (list.First));
+    return result;
 }
 ```
 
